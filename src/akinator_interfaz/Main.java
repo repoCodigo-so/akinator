@@ -10,14 +10,41 @@ package akinator_interfaz;
  */
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Scanner;
+
+class Guess<T> {
+    String question;
+    String answerYes;
+    String answerNo;
+    Node<T> nextYes;
+    Node<T> nextNo;
+
+    public Guess(String question, String answerYes, String answerNo) {
+        this.question = question;
+        this.answerYes = answerYes;
+        this.answerNo = answerNo;
+        nextYes = null;
+        nextNo = null;
+    }
+
+    public Guess(String question, String answerYes, String answerNo, Node<T> nextYes, Node<T> nextNo) {
+        this.question = question;
+        this.answerYes = answerYes;
+        this.answerNo = answerNo;
+        this.nextYes = nextYes;
+        this.nextNo = nextNo;
+    }
+}
 
 class Node<T> {
     T data;
+    Guess<T> guess;
     Node<T> left;
     Node<T> right;
-    
-    public Node(T data) {
+
+    public Node(T data, Guess<T> guess) {
         this.data = data;
+        this.guess = guess;
         left = null;
         right = null;
     }
@@ -26,11 +53,9 @@ class Node<T> {
 class BinaryTree<T> {
     Node<T> root;
 
-    public void insert(T data) {
-        Node<T> node = new Node<T>(data);
-
+    public void insert(Node<T> newNode) {
         if (root == null) {
-            root = node;
+            root = newNode;
             return;
         }
 
@@ -41,102 +66,71 @@ class BinaryTree<T> {
             Node<T> current = q.peek();
             q.remove();
 
-            if (current.left == null) {
-                current.left = node;
-                break;
+            if (current.guess != null) {
+                if (current.guess.nextYes == null) {
+                    current.guess.nextYes = newNode;
+                    break;
+                } else if (current.guess.nextNo == null) {
+                    current.guess.nextNo = newNode;
+                    break;
+                } else {
+                    q.add(current.guess.nextYes);
+                    q.add(current.guess.nextNo);
+                }
             } else {
-                q.add(current.left);
-            }
+                if (current.left == null) {
+                    current.left = newNode;
+                    break;
+                } else {
+                    q.add(current.left);
+                }
 
-            if (current.right == null) {
-                current.right = node;
-                break;
-            } else {
-                q.add(current.right);
+                if (current.right == null) {
+                    current.right = newNode;
+                    break;
+                } else {
+                    q.add(current.right);
+                }
             }
         }
     }
 
     private void inOrderTraversal(Node<T> node) {
-        if (node == null) {
-            return;
+        if (node != null) {
+            inOrderTraversal(node.left);
+            if (node.guess != null) {
+                System.out.println(node.guess.question);
+                Scanner input = new Scanner(System.in);
+                String answer = input.nextLine().toLowerCase();
+                if (answer.equals("yes")) {
+                    inOrderTraversal(node.guess.nextYes);
+                } else if (answer.equals("no")) {
+                    inOrderTraversal(node.guess.nextNo);
+                } else {
+                    System.out.println("Invalid input. Please answer \"yes\" or \"no\".");
+                    inOrderTraversal(node);
+                }
+            } else {
+                System.out.println(node.data);
+                inOrderTraversal(node.left);
+                inOrderTraversal(node.right);
+            }
         }
-
-        inOrderTraversal(node.left);
-        System.out.print(node.data + " ");
-        inOrderTraversal(node.right);
     }
 
-    public void inOrderTraversal() {
+    public void play() {
+        System.out.println("Think of an object and I'll try to guess what it is.");
         inOrderTraversal(root);
     }
-
-    private int getHeight(Node<T> node) {
-        if (node == null) {
-            return 0;
-        }
-
-        int leftHeight = getHeight(node.left);
-        int rightHeight = getHeight(node.right);
-
-        if (leftHeight > rightHeight) {
-            return leftHeight + 1;
-        } else {
-            return rightHeight + 1;
-        }
-    }
-
-    public boolean isBalanced() {
-        return isBalanced(root);
-    }
-
-    private boolean isBalanced(Node<T> node) {
-        if (node == null) {
-            return true;
-        }
-
-        int leftHeight = getHeight(node.left);
-        int rightHeight = getHeight(node.right);
-
-        if (Math.abs(leftHeight - rightHeight) <= 1 && isBalanced(node.left) && isBalanced(node.right)) {
-            return true;
-        }
-
-        return false;
-    }
 }
-
-class ThreeString {
-    String first;
-    String second;
-    String third;
-
-    public ThreeString(String first, String second, String third) {
-        this.first = first;
-        this.second = second;
-        this.third = third;
-    }
-
-    @Override
-    public String toString() {
-        return "(" + first + ", " + second + ", " + third + ")";
-    }
-}
-
 public class Main {
     public static void main(String[] args) {
-        BinaryTree<ThreeString> tree = new BinaryTree<ThreeString>();
-        tree.insert(new ThreeString("Hello", "world", "Java"));
-        tree.insert(new ThreeString("This", "is", "a"));
-        tree.insert(new ThreeString("Binary", "Tree", "Example"));
-
-        tree.inOrderTraversal();
-        System.out.println();
-
-        if (tree.isBalanced()) {
-            System.out.println("The tree is balanced");
-        } else {
-            System.out.println("The tree is not balanced");
-        }
+        BinaryTree<String> tree = new BinaryTree<String>();
+        tree.insert(new Node<String>("an elephant", null));
+        tree.insert(new Node<String>("a mouse", null));
+        tree.insert(new Node<String>(null, new Guess<String>("Is it bigger than a breadbox?", "an elephant", "a mouse")));
+        tree.insert(new Node<String>(null, new Guess<String>("Does it live in the water?", "a shark", "a lion")));
+        tree.insert(new Node<String>(null, new Guess<String>("Is it a mammal?", null, null)));
+        tree.play();
     }
 }

@@ -341,7 +341,8 @@ public class Akinator_juego extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-        BinaryTree<ThreeString> tree = new BinaryTree<ThreeString>();
+                BinaryTree<String> tree = new BinaryTree<String>();
+
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         
@@ -351,6 +352,7 @@ public class Akinator_juego extends javax.swing.JFrame {
         panelAgregar.setVisible(false);
         panelPersonaje.setVisible(true);
         this.setSize(new Dimension(955, 750));
+        tree.play();
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
@@ -372,9 +374,7 @@ public class Akinator_juego extends javax.swing.JFrame {
     }//GEN-LAST:event_nameActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        tree.insert(new ThreeString(name.getText(), phrase.getText(), url.getText()));
-        tree.inOrderTraversal();
-        System.out.println();
+        tree.insert(new Node<String>(null, new Guess<String>(name.getText(), phrase.getText(), url.getText())));
     }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
